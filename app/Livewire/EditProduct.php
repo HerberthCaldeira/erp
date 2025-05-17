@@ -4,12 +4,16 @@ namespace App\Livewire;
 
 use App\Models\Product;
 use App\ValueObjects\Money;
+use Flux\Flux;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-class CreateProduct extends Component
-{ 
+class EditProduct extends Component
+{
+    public ?Product $product = null;
+    
     #[Validate(['required', 'string', 'max:255'])]
     public $name;
 
@@ -22,6 +26,19 @@ class CreateProduct extends Component
     #[Validate(['required', 'string', 'max:255'])]
     public $variations;
 
+    #[On('edit-product')]
+    public function open(int $id)
+    {   
+        $this->product = Product::findOrFail($id);
+
+        $this->name = $this->product->name;
+        $this->price = Money::formatString($this->product->price);
+        $this->variations = $this->product->variations;
+        $this->quantity = $this->product->stock->quantity;
+
+        Flux::modal('edit-product')->show();
+    }
+
     public function updatedPrice() {       
        $this->price = Money::formatString($this->price);
     }
@@ -29,25 +46,26 @@ class CreateProduct extends Component
     public function save()
     {
         $this->validate();
+
         DB::transaction(function () {
-            $product = Product::create([
+            $this->product->update([
                 'name' => $this->name,
                 'price' => $this->price,
                 'variations' => $this->variations
             ]);
             
-            $product->stock()->create([
+            $this->product->stock()->update([
                 'quantity' => $this->quantity
             ]);
         });
 
-        $this->dispatch('alert', message: 'Produto criado com sucesso', type: 'success');
-        $this->reset();
+        $this->dispatch('alert', message: 'Produto atualizado com sucesso', type: 'success');
+
         $this->dispatch('ProductTable::refresh');
     }
 
     public function render()
     {
-        return view('livewire.create-product');
+        return view('livewire.edit-product');
     }
 }

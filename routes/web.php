@@ -21,4 +21,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 });
 
+Route::get('session', function () {
+   session()->forget('cart');
+    return session()->all();
+})->name('session');
+
 require __DIR__.'/auth.php';

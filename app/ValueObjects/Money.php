@@ -35,6 +35,11 @@ class Money implements JsonSerializable
         return self::fromFloat((float) $formattedValue);
     }
 
+    public static function fromFloat(float $amount): self
+    {
+        return new self((int) round($amount * 100));
+    }
+
     public static function formatString(string $value): string {
         // Remover caracteres não numéricos
         $value = preg_replace('/\D/', '', $value);
@@ -64,6 +69,12 @@ class Money implements JsonSerializable
         return $this->cents;
     }
 
+    public function toFloat(): float
+    {
+        return $this->cents / 100;
+    }
+
+
     public function add(Money $other): self
     {
         return new self($this->cents + $other->cents);
@@ -74,7 +85,7 @@ class Money implements JsonSerializable
         return new self($this->cents - $other->cents);
     }
 
-    public function equals(Money $other): bool
+    public function isEqualTo(Money $other): bool
     {
         return $this->cents === $other->cents;
     }
@@ -84,24 +95,22 @@ class Money implements JsonSerializable
         return $this->cents > $other->cents;
     }
 
+    public function isGreaterOrEqualsThan(Money $other): bool {
+        return $this->cents >= $other->cents;
+    }
+
     public function isLessThan(Money $other): bool
     {
         return $this->cents < $other->cents;
     }
 
+    public function isLessOrEqualsThan(Money $other): bool {
+        return $this->cents <= $other->cents;
+    }
+
     public function jsonSerialize(): int
     {
         return $this->cents;
-    }
-
-    public function toFloat(): float
-    {
-        return $this->cents / 100;
-    }
-
-    public static function fromFloat(float $amount): self
-    {
-        return new self((int) round($amount * 100));
     }
 
     public function formatted(string $locale = 'pt_BR', string $currency = 'BRL'): string
