@@ -35,6 +35,27 @@ return new class extends Migration
 
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('status')->default('pending');
+            $table->integer('freight')->default(0);
+            $table->integer('discount')->default(0);
+            $table->integer('total')->default(0);
+            $table->string('email');
+            $table->string('zipcode')->nullable();
+            $table->string('address')->nullable();
+            $table->string('address_number')->nullable();
+            $table->string('address_complement')->nullable();
+            $table->string('address_district')->nullable();
+            $table->string('address_city')->nullable();
+            $table->string('address_state')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('order_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_id')->constrained();
+            $table->foreignId('product_id')->constrained();
+            $table->integer('quantity')->default(0);
+            $table->integer('price')->default(0);
             $table->timestamps();
         });
 
@@ -43,7 +64,7 @@ return new class extends Migration
             $table->string('status')->default('enable');
             $table->string('code');
             $table->string('type')->default('fixed');            
-            $table->decimal('value')->default(0);             
+            $table->decimal('value', 10, 2)->nullable();             
             $table->dateTime('starts_at');
             $table->dateTime('expires_at');
             $table->timestamps();

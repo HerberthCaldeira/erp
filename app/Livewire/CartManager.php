@@ -2,17 +2,43 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SendOrderConfirmationEmail;
+use App\Models\Coupon;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
+use App\ValueObjects\Address;
 use App\ValueObjects\Money;
+use Flux\Flux;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class CartManager extends Component
 {
-    //#[Session(key: 'cart')]
+    #[Session(key: 'cart')]
     public array $cart = [];
+
+    public bool $hasCoupon = false;
+
+    public string $couponCode = '';
+
+    public int $discount = 0;
+
+    #[Validate('required')]
+    public string $zipcode = '';
+
+    public ?array $address = null;
+
+    #[Validate('required')]
+    public string $addressNumber = '';
+
+    #[Validate('required', 'email')]
+    public string $email = '';
  
     public function mount()
     {
@@ -103,7 +129,94 @@ class CartManager extends Component
         return $twenty->toCents();
     }
 
+    #[Computed()]
+    public function total()
+    {
+        return $this->subtotal() + $this->freight() - $this->discount;
+    }
 
+    public function applyCoupon()
+    {
+        $coupon = Coupon::where('code', $this->couponCode)->first();
+        
+        if(! $coupon instanceof Coupon) {
+            $this->hasCoupon = false;
+            $this->discount = 0;
+            $this->couponCode = '';
+            return;
+        }
+
+        $this->hasCoupon = true;
+
+        if($coupon->type === 'percent') {
+            $this->discount = ($this->subtotal() * $coupon->value) / 100;          
+            return;
+        }
+
+        if($coupon->type === 'fixed') {
+            $this->discount = Money::fromFloat($coupon->value)->toCents();
+            return;
+        }
+    }
+
+    public function removeCoupon()
+    {
+        $this->hasCoupon = false;
+        $this->discount = 0;
+        $this->couponCode = '';
+    }
+
+    public function updatedZipcode($value)
+    {
+        $response = Http::get("https://viacep.com.br/ws/{$value}/json/");
+
+        if($response->successful()) {
+            $this->address = $response->json();
+            return;
+        }
+
+        $this->address = null;
+    }
+
+    public function checkout()
+    {
+        $this->validate();
+
+        DB::transaction(function () {
+            $order = Order::create([
+                'status' => 'pending',
+                'freight' => $this->freight(),
+                'discount' => $this->discount,
+                'total' => $this->total(),
+                'email' => $this->email,
+                'zipcode' => $this->zipcode,
+                'address' => $this->address['logradouro'],
+                'address_number' => $this->addressNumber,
+                'address_complement' => $this->address['complemento'],
+                'address_district' => $this->address['bairro'],
+                'address_city' => $this->address['localidade'],
+                'address_state' => $this->address['uf'],
+            ]);
+
+            foreach($this->cart as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+
+            session()->forget('cart');
+            $this->reset();
+
+            Flux::modal('cart-manager')->close();
+
+            SendOrderConfirmationEmail::dispatch($order);
+            
+        });
+        
+    }
 
     public function render()
     {

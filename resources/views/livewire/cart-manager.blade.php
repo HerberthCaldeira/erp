@@ -71,8 +71,57 @@
                                     {{ App\ValueObjects\Money::fromCents($this->freight)->formatted() }}
                                 </td>
                             </tr>
+                            <tr>
+                                <td colspan="2" class="px-6 py-4 whitespace-nowrap">
+                                    {{ __('Cupom') }}
+                                </td>
+                                <td colspan="2" class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex gap-2 ">
+                                        <flux:input type="text" placeholder="Código do cupom" wire:model="couponCode" class="w-full"/>
+                                        <flux:button :disabled="$hasCoupon" wire:click="applyCoupon">{{ __('Aplicar') }}</flux:button> 
+                                        <flux:button :disabled="!$hasCoupon" wire:click="removeCoupon">{{ __('Remover') }}</flux:button> 
+                                    </div>
+                                </td>
+                                <td colspan="1" class="px-6 py-4 whitespace-nowrap">
+                                    {{ $this->discount ? App\ValueObjects\Money::fromCents($this->discount)->formatted() : 'N/A' }}                                  
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 whitespace-nowrap">
+                                    {{ __('Total') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ App\ValueObjects\Money::fromCents($this->total)->formatted() }}
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                    <hr/>
+                    
+                    <div>
+
+                        <form wire:submit="checkout" class="p-8 rounded-lg shadow-md" id="form-checkout">
+                            <flux:input :label="__('Email')" type="email" placeholder="Email" wire:model="email" class="w-full"/>
+
+                            <flux:input :label="__('CEP')" type="text" placeholder="CEP" wire:model.live="zipcode" class="w-full"/>
+                            @if(! is_null($address))
+                                <div>
+                                    <p>
+                                        {{ $address['estado'] }} | {{ $address['logradouro'] }} | {{ $address['bairro'] }} |
+                                        {{ $address['localidade'] }} | {{ $address['uf'] }} | {{ $address['cep'] }}
+                                    </p>
+                                </div>
+                            @endif
+
+                            <flux:input :label="__('Número')" type="text" placeholder="Número" wire:model="addressNumber" class="w-full"/>
+                            
+                            <div class="flex justify-end mt-4">
+                                <flux:button form="form-checkout" type="submit">{{ __('Finalizar') }}</flux:button>
+                            </div>
+                        </form>
+                      
+     
+                    </div>
                 </div>
                 @endif
             </div>
