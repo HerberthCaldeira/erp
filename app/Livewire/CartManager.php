@@ -76,11 +76,24 @@ class CartManager extends Component
     #[On('increase-quantity')]
     public function increaseQuantity($productId)
     {
-        $this->cart = array_map(fn($item) => $item['product_id'] === $productId ? [
-            ...$item,
-            'quantity' => $item['quantity'] + 1,
-            'total_row' => Money::formatString( $item['price'] * ($item['quantity'] + 1))
-        ] : $item, $this->cart);
+        $this->cart = array_map(function($item) use ($productId) {
+
+            if($item['product_id'] === $productId) {
+                $inStock = Product::find($productId)->stock->quantity;
+
+                if($inStock < $item['quantity'] + 1) {
+                    return $item;
+                }
+
+                return [
+                    ...$item,
+                    'quantity' => $item['quantity'] + 1,
+                    'total_row' => Money::formatString( $item['price'] * ($item['quantity'] + 1))
+                ];
+            }
+
+            return $item;
+        }, $this->cart);
     }
 
     #[On('decrease-quantity')]
@@ -137,7 +150,10 @@ class CartManager extends Component
 
     public function applyCoupon()
     {
-        $coupon = Coupon::where('code', $this->couponCode)->first();
+        $coupon = Coupon::query()
+            ->where('code', $this->couponCode)
+            ->Valid()
+            ->first();
         
         if(! $coupon instanceof Coupon) {
             $this->hasCoupon = false;
@@ -168,14 +184,18 @@ class CartManager extends Component
 
     public function updatedZipcode($value)
     {
-        $response = Http::get("https://viacep.com.br/ws/{$value}/json/");
+        try {
+            $response = Http::get("https://viacep.com.br/ws/{$value}/json/");
 
-        if($response->successful()) {
-            $this->address = $response->json();
-            return;
+            if($response->successful()) {
+                $this->address = $response->json();
+                return;
+            }
+    
+            $this->address = null;
+        } catch (\Exception $e) {
+            $this->address = null;
         }
-
-        $this->address = null;
     }
 
     public function checkout()
@@ -205,10 +225,15 @@ class CartManager extends Component
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                 ]);
+
+                Product::find($item['product_id'])->stock()->decrement('quantity', $item['quantity']);
             }
 
             session()->forget('cart');
             $this->reset();
+
+
+            $this->dispatch('ProductTable::refresh');
 
             Flux::modal('cart-manager')->close();
 

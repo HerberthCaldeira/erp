@@ -11,8 +11,14 @@ class Coupon extends Model
         'status',
         'type',
         'value',
-        'limit',
         'starts_at',
         'expires_at',
     ];
+
+    public function scopeValid($query)
+    {
+        return $query->where('status', 'enable')         
+            ->where('starts_at', '<', now())
+            ->where('expires_at', '>', now());
+    }
 }

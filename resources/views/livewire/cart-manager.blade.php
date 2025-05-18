@@ -23,11 +23,12 @@
                                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {{ __('Preço') }}
                                 </th>
-                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {{ __('Quantidade') }}
-                                </th>
+                          
                                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {{ __('Total') }}
+                                </th>
+                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ __('Quantidade') }}
                                 </th>
                                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {{ __('Ações') }}
@@ -43,11 +44,12 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         {{ $item['price_formatted'] }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $item['quantity'] }}
-                                    </td>
+                                
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         {{ $item['total_row'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{ $item['quantity'] }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap flex gap-2">
                                         <flux:button size="xs" wire:click="increaseQuantity({{ $item['product_id'] }})">+</flux:button>
@@ -116,11 +118,9 @@
                             <flux:input :label="__('Número')" type="text" placeholder="Número" wire:model="addressNumber" class="w-full"/>
                             
                             <div class="flex justify-end mt-4">
-                                <flux:button form="form-checkout" type="submit">{{ __('Finalizar') }}</flux:button>
+                                <flux:button :disabled="!$address" form="form-checkout" type="submit">{{ __('Finalizar') }}</flux:button>
                             </div>
                         </form>
-                      
-     
                     </div>
                 </div>
                 @endif
