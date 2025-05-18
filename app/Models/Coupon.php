@@ -6,5 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Coupon extends Model
 {
-    protected $fillable = [];
+    protected $fillable = [
+        'code',
+        'status',
+        'type',
+        'value',
+        'limit',
+        'starts_at',
+        'expires_at',
+    ];
 }

@@ -4,7 +4,6 @@
      
         <livewire:cart-manager />
 
-
         <livewire:product-table />
         <livewire:edit-product />
 

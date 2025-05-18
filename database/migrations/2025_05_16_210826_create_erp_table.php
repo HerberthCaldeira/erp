@@ -40,6 +40,12 @@ return new class extends Migration
 
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
+            $table->string('status')->default('enable');
+            $table->string('code');
+            $table->string('type')->default('fixed');            
+            $table->decimal('value')->default(0);             
+            $table->dateTime('starts_at');
+            $table->dateTime('expires_at');
             $table->timestamps();
         });
     }
