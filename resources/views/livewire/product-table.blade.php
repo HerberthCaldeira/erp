@@ -45,7 +45,7 @@
                             wire:click="$dispatch('edit-product', { 'id': {{ $product->id }} })"
                             class="text-indigo-600 hover:text-indigo-900"
                         >
-                            {{ __('Editar') }}
+                            {{ __('Edit') }}
                         </flux:button>
                         <!---->
                         
@@ -53,7 +53,7 @@
                             wire:click="$dispatch('add-to-cart', { 'productId': {{ $product->id }} })"
                             class="text-indigo-600 hover:text-indigo-900"
                         >
-                            {{ __('Adicionar no carrinho') }}
+                            {{ __('Add to cart') }}
                         </flux:button>
                         <!---->
 
@@ -61,7 +61,7 @@
                             wire:click="$dispatch('remove-from-cart', { 'productId': {{ $product->id }} })"
                             class="text-indigo-600 hover:text-indigo-900"
                         >
-                            {{ __('Remover do carrinho') }}
+                            {{ __('Remove from cart') }}
                         </flux:button>
 
                     </td>

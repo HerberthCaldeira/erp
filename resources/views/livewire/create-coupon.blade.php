@@ -3,45 +3,45 @@
     <form wire:submit="save" id="create-coupon" class=" p-8 rounded-lg shadow-md">
 
         <flux:select :label="__('Status do cupom')" wire:model="status">
-            <flux:select.option value="enable" selected>{{ __('Ativo') }}</flux:select.option>
-            <flux:select.option value="disable">{{ __('Inativo') }}</flux:select.option>
+            <flux:select.option value="enable" selected>{{ __('Active') }}</flux:select.option>
+            <flux:select.option value="disable">{{ __('Inactive') }}</flux:select.option>
         </flux:select>
 
         <flux:input 
-            :label="__('Código do cupom')" 
+            :label="__('Coupon code')" 
             type="text"
-            placeholder="Código do cupom" 
+            placeholder="Coupon code" 
             wire:model="code"
         />
 
 
-        <flux:select :label="__('Tipo do cupom')" wire:model="type">
-            <flux:select.option value="fixed">{{ __('Fixo') }}</flux:select.option>
-            <flux:select.option value="percent">{{ __('Percentual') }}</flux:select.option>
+        <flux:select :label="__('Coupon type')" wire:model="type">
+            <flux:select.option value="fixed">{{ __('Fixed') }}</flux:select.option>
+            <flux:select.option value="percent">{{ __('Percentage') }}</flux:select.option>
         </flux:select>
 
         <flux:input 
-            :label="__('Valor do cupom')" 
+            :label="__('Coupon value')" 
             type="number" 
-            placeholder="Valor do cupom" 
+            placeholder="Coupon value" 
             wire:model.live="value"
         /> 
 
         <flux:input 
-            :label="__('Data de início')" 
+            :label="__('Start date')" 
             type="date" 
-            placeholder="Data de início" 
+            placeholder="Start date" 
             wire:model="starts_at"            
         />
 
         <flux:input 
-            :label="__('Data de fim')" 
+            :label="__('End date')" 
             type="date" 
-            placeholder="Data de fim" 
+            placeholder="End date" 
             wire:model="expires_at"
         />
 
-        <flux:button type="submit" class="mt-4 w-full">{{ __('Criar') }}</flux:button>
+        <flux:button type="submit" class="mt-4 w-full">{{ __('Create') }}</flux:button>
     </form>
 
 
